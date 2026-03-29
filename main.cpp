@@ -4,19 +4,17 @@
 #include <chrono> // For stopwatch
 #include "Rating.h"
 #include "MergeSort.h"
-
+#include "QuickSort.h"
 using namespace std;
 using namespace std::chrono; //readability
 
 int main() {
     vector<Rating> ratings;
     ifstream file("u.data");
-
     if (!file.is_open()) {
         cout << "Error: Could not open u.data. Check your folder!" << endl;
         return 1;
     }
-
     int uId, mId, r;
     long ts;
     while (file >> uId >> mId >> r >> ts) {
@@ -27,20 +25,15 @@ int main() {
     cout << "Successfully loaded " << ratings.size() << " movie ratings!" << endl;
 
     // Make a copy of the unsorted data
-    // This is crucial so partner has the original unsorted data for his QuickSort later.
     vector<Rating> mergeData = ratings;
+    vector<Rating> quickData = ratings;
 
     cout << "\nStarting MergeSort..." << endl;
-
     // Start clock
     auto start = high_resolution_clock::now();
-
-
     mergeSort(mergeData, 0, mergeData.size() - 1);
-
     // Stop the clock
     auto stop = high_resolution_clock::now();
-
     // Calculate the duration
     auto duration = duration_cast<milliseconds>(stop - start);
     cout << "MergeSort finished in: " << duration.count() << " milliseconds!" << endl;
@@ -52,11 +45,46 @@ int main() {
             break;
         }
     }
-
     if (isSorted) {
         cout << "Status: SUCCESS (Data is sorted perfectly by rating)" << endl;
     } else {
         cout << "Status: FAILED (Data is not sorted)" << endl;
     }
+
+    cout << "\nStarting QuickSort..." << endl;
+    // Start clock
+    start = high_resolution_clock::now();
+    quickSort(quickData, 0, quickData.size() - 1);
+    // Stop the clock
+    stop = high_resolution_clock::now();
+    // Calculate the duration
+    auto quickDuration = duration_cast<milliseconds>(stop - start);
+    cout << "QuickSort finished in: " << quickDuration.count() << " milliseconds!" << endl;
+
+    bool quickSorted = true;
+    for (size_t i = 0; i < quickData.size() - 1; i++) {
+        if (quickData[i].rating > quickData[i+1].rating) {
+            quickSorted = false;
+            break;
+        }
+    }
+    if (quickSorted) {
+        cout << "Status: SUCCESS (Data is sorted perfectly by rating)" << endl;
+    } else {
+        cout << "Status: FAILED (Data is not sorted)" << endl;
+    }
+
+    cout << "\n──────────────────────────────────" << endl;
+    cout << "Performance Comparison:" << endl;
+    cout << "  MergeSort : " << duration.count() << " ms" << endl;
+    cout << "  QuickSort : " << quickDuration.count() << " ms" << endl;
+    if (duration < quickDuration)
+        cout << "  Winner    : MergeSort" << endl;
+    else if (quickDuration < duration)
+        cout << "  Winner    : QuickSort" << endl;
+    else
+        cout << "  Result    : Tie" << endl;
+    cout << "──────────────────────────────────" << endl;
+
     return 0;
 }
